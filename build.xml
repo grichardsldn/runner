@@ -1,0 +1,16 @@
+<project default='compile'>
+  <target name="compile">
+ 	  <javac srcdir="src"
+		  destdir="bin"
+		  source="1.6"
+      debug="on"
+	  />
+  </target>
+  <target name="clean"
+    description="clean up" >
+    <delete>
+      <fileset dir="bin" includes="**/*.class"/>
+    </delete>
+  </target>
+</project>
+
