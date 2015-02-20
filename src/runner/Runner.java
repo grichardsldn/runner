@@ -1,6 +1,7 @@
 package runner;
 import java.util.*;
 import java.lang.management.*;
+import java.io.*;
 
 import javax.management.*;
 
@@ -45,8 +46,7 @@ public class Runner {
 		mbean.setRunner( this);
 		
 		MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-		try
-		{
+		try {
 			server.registerMBean( mbean, 
 				new ObjectName("com.avaya.runner:type=RunAdmin"));
 		}
@@ -108,16 +108,28 @@ public class Runner {
 	 */
 	public static void main(String[] args) 
 	{	
+    if( args.length != 1 ) {
+      System.err.println("usage: <command-list_file>");
+      System.exit(1);
+    } 
+
 		Runner runner = new Runner();
-		
-		for( int i = 1 ; i <= 6000 ; i++)
-		{
-			String num = String.format("%06d", i);
-			runner.AddJob("convert /tmp/hurt/Main/main_"+ num+ ".jpg "+
-					"-sharpen 0x0.2 -contrast-stretch 10%x90% /tmp/hurt/Main/out/main_" +
-					num + ".jpg", "processing "+ num, 1.0);
-		}
-		
+
+    try {
+	    BufferedReader br = 
+        new BufferedReader(new FileReader( new File( args[0])));	
+  
+        String command = null;
+        int command_num = 1;
+        while(( command = br.readLine()) != null ) {
+          runner.AddJob( command, "command #" + command_num ++, 1.0 );
+        }    
+        br.close();
+    } catch ( Exception e ) {
+      System.err.println("Exception reading file: " + e.toString() );
+      System.exit(1);
+    }
+
 		runner.AddRunThread("Thread1");
 		runner.AddRunThread("Thread2");
 		runner.AddRunThread("Thread3");
